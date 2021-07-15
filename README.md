@@ -1,3 +1,7 @@
+## React Chat App Client
+This is the client side of a chat app built with JS in React using Socket.IO-client.
+The server side can be found here:
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
