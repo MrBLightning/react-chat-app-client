@@ -3,6 +3,8 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import ReactEmoji from 'react-emoji';
 
+const { REACT_APP_ENDPOINT } = process.env;
+
 const useStyles = makeStyles(() => ({
   userImg: {
     borderRadius: '50%',
@@ -64,7 +66,7 @@ const useStyles = makeStyles(() => ({
     color: 'white',
     letterSpacing: '0.3px'
   },
-  sentTextPR:{
+  sentTextPR: {
     display: 'flex',
     alignItems: 'center',
     fontFamily: 'Helvetica',
@@ -72,7 +74,7 @@ const useStyles = makeStyles(() => ({
     letterSpacing: '0.3px',
     paddingRight: '10px'
   },
-  sentTextPL:{
+  sentTextPL: {
     display: 'flex',
     alignItems: 'center',
     fontFamily: 'Helvetica',
@@ -87,6 +89,12 @@ const Message = ({ message: { text, user, pic }, name }) => {
   const [isSentByCurrentUser, setIsSentByCurrentUser] = useState(false);
   const [usePic, setUsePic] = useState(pic);
   const trimmedName = name.trim().toLowerCase();
+
+  useEffect(() => {
+    if (usePic && usePic !== '' && usePic.substring(0, 7) !== 'http://' && usePic.substring(0, 8) !== 'https://') {
+      setUsePic(REACT_APP_ENDPOINT + usePic);
+    }
+  }, [usePic]);
 
   useEffect(() => {
     if (user === trimmedName) {
@@ -105,7 +113,7 @@ const Message = ({ message: { text, user, pic }, name }) => {
 
   useEffect(() => {
     if (isSentByCurrentUser) {
-      const savedPic = localStorage.getItem('pic');
+      let savedPic = localStorage.getItem('pic');
       if ((!usePic || usePic === '') && savedPic && savedPic !== '') {
         setUsePic(savedPic);
       }

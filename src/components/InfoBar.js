@@ -4,6 +4,8 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 
+const { REACT_APP_ENDPOINT } = process.env;
+
 const useStyles = makeStyles(() => ({
   infoBar: {
     display: 'flex',
@@ -59,6 +61,10 @@ const useStyles = makeStyles(() => ({
 const InfoBar = ({ name, pic }) => {
   const classes = useStyles();
   const history = useHistory();
+
+  if (pic && pic !== '' && pic.substring(0, 7) !== 'http://' && pic.substring(0, 8) !== 'https://') {
+    pic = REACT_APP_ENDPOINT + pic;
+  }
 
   const hashCode = (str) => {
     let hash = 0;

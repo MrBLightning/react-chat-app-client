@@ -10,6 +10,8 @@ import Messages from './Messages/Messages';
 import InfoBar from './InfoBar';
 import Input from './Input';
 
+const { REACT_APP_ENDPOINT } = process.env;
+
 const useStyles = makeStyles(() => ({
     wrapper: {
         display: 'flex',
@@ -78,8 +80,8 @@ const Chat = ({ location }) => {
     const [users, setUsers] = useState('');
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
-    // const ENDPOINT = 'localhost:5000'; // For local testing
-    const ENDPOINT = 'https://barak-react-chat-app.herokuapp.com/'; // for prod
+    // use REACT_APP_ENDPOINT=http://localhost:5000/ in .env For local testing
+    // use REACT_APP_ENDPOINT=https://barak-react-chat-app.herokuapp.com/ in .env for prod
 
     useEffect(() => {
         const { name } = queryString.parse(location.search);
@@ -91,18 +93,18 @@ const Chat = ({ location }) => {
 
         const pic = localStorage.getItem('pic');
 
-        socket = io(ENDPOINT);
+        socket = io(REACT_APP_ENDPOINT);
 
         setName(newName);
         setPic(pic);
 
-        socket.emit('join', { name: newName, room }, (error) => {
+        socket.emit('join', { name: newName, room, pic }, (error) => {
             if (error) {
                 alert(error);
                 history.push('/');
             }
         });
-    }, [ENDPOINT, location.search, history]);
+    }, [location.search, history]);
 
     useEffect(() => {
         socket.on('message', message => {
@@ -110,7 +112,6 @@ const Chat = ({ location }) => {
         });
 
         socket.on("roomData", ({ users }) => {
-            console.log('roomData',users.length);
             setUsers(users);
         });
     }, []);

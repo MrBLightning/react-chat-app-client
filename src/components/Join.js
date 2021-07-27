@@ -4,6 +4,10 @@ import StarIcon from "@material-ui/icons/Star";
 
 import { Button, Paper, InputBase, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import ItemAvatar from './ProfilePic/ItemAvatar';
+import axios from 'axios';
+
+const { REACT_APP_ENDPOINT } = process.env;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -57,8 +61,9 @@ export default function SignIn() {
   const history = useHistory();
   const [name, setName] = useState('');
   const [pic, setPic] = useState('');
+  const [croppedImage, setCroppedImage] = React.useState(null);
 
-  const goToChat = () => {
+  const goToChat = async () => {
     let problem = false;
     if (!name) {
       alert('A user name is required to join the chat');
@@ -68,7 +73,7 @@ export default function SignIn() {
       alert(`You may not use the nickname 'admin' to enter the chat`);
       problem = true;
     }
-    if (pic && pic !== '') {
+    if (pic && pic !== '' && !croppedImage) {
       if (pic.substring(0, 7) !== 'http://' && pic.substring(0, 8) !== 'https://') {
         alert('image link should be a valid URL');
         problem = true;
@@ -78,8 +83,31 @@ export default function SignIn() {
         problem = true;
       }
     }
+    if (croppedImage) {
+      const formData = new FormData();
+      formData.append('profile-pic', croppedImage);
+      await axios
+        .post(REACT_APP_ENDPOINT + `images`, formData, {
+          headers: {
+            'content-type': 'multipart/form-data',
+          },
+        })
+        .then(({ data }) => {
+          localStorage.setItem('pic', data.s3url);
+        })
+        .catch((error) => {
+          const errorMsg =
+            error?.response?.data?.message || error?.response?.status === 413
+              ? 'File is too large'
+              : error;
+          alert('Something went wrong uploading your picture: ', errorMsg);
+          problem = true;
+        });
+    }
     if (!problem) {
-      saveToStorage();
+      if (!croppedImage) {
+        saveToStorage();
+      }
       history.push(`/chat?name=${name.trim().toLowerCase()}`);
     }
   }
@@ -113,9 +141,11 @@ export default function SignIn() {
           onKeyPress={event => event.key === 'Enter' ? goToChat() : null}
         />
       </Paper>
+      <ItemAvatar croppedImage={croppedImage} setCroppedImage={(e) => setCroppedImage(e)} />
       <Button variant="contained" className={classes.button} onClick={() => goToChat()}>
         Join The Chat
       </Button>
+      {/* <img src='http://localhost:5000/images/35e769159ec72cff096ee4d5a5fb87e5' ></img> */}
     </div>
   );
 }
